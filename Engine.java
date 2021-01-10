@@ -9,8 +9,7 @@ public class Engine {
 						  {0,-20,0,20,25,30,50,0}, 
 						  {0,10,-10,0,10,20,50,0},				
 						  {0,10,-5,0,5,10,50,0},
-						  {0,5,5,0,5,10,50,0},
-						  };
+						  {0,5,5,0,5,10,50,0},};
 	int [][] knighttable = {{-50,-40,-30,-30,-30,-30,-40,-50},
 							{-40,-20,5,0,5,0,-20,-40},
 							{-30,0,10,15,15,10,0,-30},
@@ -59,22 +58,24 @@ public class Engine {
 			return score(cur);
 		}
 		int ret = 0;
-		if(max) {			
+		if(max) {
+			ret = Integer.MIN_VALUE;
 			for(Move e:cur.whitemove) {
 				Board next = new Board(cur);
 				next.makemove(e);
 				next.updatenewpos();
 				int temp = dfs(next,!max,depth+1);
-				if(temp >= ret) {ret = temp;}
+				ret = Math.max(temp, ret);
 			}		
 		}
 		else {
+			ret = Integer.MAX_VALUE;
 			for(Move e:cur.blackmove) {
 				Board next = new Board(cur);
 				next.makemove(e);
 				next.updatenewpos();
 				int temp = dfs(next,!max,depth+1);
-				if(temp <= ret) {ret = temp;}
+				ret = Math.min(temp, ret);
 			}
 		}
 		return ret;
@@ -84,32 +85,32 @@ public class Engine {
 		for(int i = 0;i<8;i++) {
 			for(int j = 0;j<8;j++) {
 				if(cur.board[i][j] instanceof Pawn) {
-					ret += (white ? 10:-10);
+					ret += (cur.board[i][j].white ? 10:-10);
 					if(cur.board[i][j].white) {ret += pawntable[i][j];}
 					else {ret -= pawntable[i][7-j];}
 				}
 				else if(cur.board[i][j] instanceof Knight) {
-					ret += (white ? 30:-30);
+					ret += (cur.board[i][j].white ? 30:-30);
 					if(cur.board[i][j].white) {ret += knighttable[i][j];}
 					else {ret -= knighttable[i][7-j];}
 				}
 				else if(cur.board[i][j] instanceof Bishop) {
-					ret += (white ? 30:-30);
+					ret += (cur.board[i][j].white ? 30:-30);
 					if(cur.board[i][j].white) {ret += bishoptable[i][j];}
 					else {ret -= bishoptable[i][7-j];}
 				}
 				else if(cur.board[i][j] instanceof Rook) {
-					ret += (white ? 50:-50);
+					ret += (cur.board[i][j].white ? 50:-50);
 					if(cur.board[i][j].white) {ret += rooktable[i][j];}
 					else {ret -= rooktable[i][7-j];}
 				}
 				else if(cur.board[i][j] instanceof Queen) {
-					ret += (white ? 90:-90);
+					ret += (cur.board[i][j].white ? 90:-90);
 					if(cur.board[i][j].white) {ret += queentable[i][j];}
 					else {ret -= queentable[i][7-j];}
 				}
 				else if(cur.board[i][j] instanceof King){
-					ret += (white ? 900:-900);
+					ret += (cur.board[i][j].white ? 900:-900);
 					if(cur.board[i][j].white) {ret += kingtable[i][j];}
 					else {ret -= kingtable[i][7-j];}
 				}
@@ -119,28 +120,28 @@ public class Engine {
 	}
 	Move gen(Board cur) {
 		Move ret = new Move(0,0,0,0,0);
-		int curscore = 0;
 		if(white) {
+			int curscore = Integer.MIN_VALUE;
 			for(Move e:cur.whitemove) {
-				//e.printmove();
 				Board next = new Board(cur);
 				next.makemove(e);
 				next.updatenewpos();
 				int temp = dfs(next,true,0);
-				if(temp >= curscore) {
+				if(temp > curscore) {
 					ret = e;
 					curscore = temp;
 				}
 			}
 		}
 		else {
+			int curscore = Integer.MAX_VALUE;
 			for(Move e:cur.blackmove) {
 				Board next = new Board(cur);
 				next.makemove(e);
 				next.updatenewpos();
 				int temp = dfs(next,false,0);
-				if(temp <= curscore) {
-					ret = new Move(e.r1,e.c1,e.r2,e.c2,e.movetype,e.n);
+				if(temp < curscore) {
+					ret = e;
 					curscore = temp;
 				}
 			}
