@@ -126,6 +126,10 @@ public class Engine {
 				Board next = new Board(cur);
 				next.makemove(e);
 				next.updatenewpos();
+				if(whitematingsequence(next,false,0)) {
+					ret = e;
+					break;
+				}
 				int temp = dfs(next,true,0);
 				if(temp > curscore) {
 					ret = e;
@@ -139,6 +143,10 @@ public class Engine {
 				Board next = new Board(cur);
 				next.makemove(e);
 				next.updatenewpos();
+				if(blackmatingsequence(next,true,0)) {
+					ret = e;
+					break;
+				}
 				int temp = dfs(next,false,0);
 				if(temp < curscore) {
 					ret = e;
@@ -147,5 +155,71 @@ public class Engine {
 			}
 		}
 		return ret;
+	}
+	boolean whitematingsequence(Board cur,boolean turn,int depth) {
+		if(depth == 5) {return false;}
+		if(!turn && cur.checkblackmate(cur)) {return true;}
+		if(turn) {
+			int bkingr = 0,bkingc = 0;
+			for(int i = 0;i<8;i++) {
+				for(int j =0;j<8;j++) {
+					if(cur.board[i][j] instanceof King && !cur.board[i][j].white) {
+						bkingr = i;bkingc = j;
+					}
+				}
+			}
+			boolean mate = false;
+			for(Move e:cur.whitemove) {
+				Board next = new Board(cur);
+				next.makemove(e);
+				next.updatenewpos();
+				if(next.whiteattack[bkingr][bkingc] > 0) {
+					mate = (mate || whitematingsequence(next,!turn,depth+1));
+				}
+			}
+			return mate;
+		}
+		else {
+			for(Move e:cur.blackmove) {
+				Board next = new Board(cur);
+				next.makemove(e);
+				next.updatenewpos();
+				if(!whitematingsequence(next,!turn,depth+1)) {return false;}
+			}
+			return true;
+		}
+	}
+	boolean blackmatingsequence(Board cur,boolean turn,int depth) {
+		if(depth == 5) {return false;}
+		if(!turn && cur.checkwhitemate(cur)) {return true;}
+		if(!turn) {
+			int wkingr = 0,wkingc = 0;
+			for(int i = 0;i<8;i++) {
+				for(int j =0;j<8;j++) {
+					if(cur.board[i][j] instanceof King && cur.board[i][j].white) {
+						wkingr = i;wkingc = j;
+					}
+				}
+			}
+			boolean mate = false;
+			for(Move e:cur.blackmove) {
+				Board next = new Board(cur);
+				next.makemove(e);
+				next.updatenewpos();
+				if(cur.blackattack[wkingr][wkingc] > 0) {
+					mate = (mate || blackmatingsequence(next,!turn,depth+1));
+				}
+			}
+			return mate;
+		}
+		else {
+			for(Move e:cur.whitemove) {
+				Board next = new Board(cur);
+				next.makemove(e);
+				next.updatenewpos();
+				if(!blackmatingsequence(next,!turn,depth+1)) {return false;}
+			}
+			return true;
+		}
 	}
 }
