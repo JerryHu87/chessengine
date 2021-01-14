@@ -53,8 +53,8 @@ public class Engine {
 	public Engine(boolean white) {
 		this.white = white;
 	}
-	int dfs(Board cur,boolean max,int depth) {
-		if(depth == 2) {
+	int dfs(Board cur,boolean max,int depth,int alpha,int beta) {
+		if(depth == 4) {
 			return score(cur);
 		}
 		int ret = 0;
@@ -64,7 +64,9 @@ public class Engine {
 				Board next = new Board(cur);
 				next.makemove(e);
 				next.updatenewpos();
-				int temp = dfs(next,!max,depth+1);
+				int temp = dfs(next,!max,depth+1,alpha,beta);
+				alpha = Math.max(alpha,temp);
+				if(alpha >= beta) {break;}
 				ret = Math.max(temp, ret);
 			}		
 		}
@@ -74,7 +76,9 @@ public class Engine {
 				Board next = new Board(cur);
 				next.makemove(e);
 				next.updatenewpos();
-				int temp = dfs(next,!max,depth+1);
+				int temp = dfs(next,!max,depth+1,alpha,beta);
+				beta = Math.min(beta, temp);
+				if(beta <= alpha) {break;}
 				ret = Math.min(temp, ret);
 			}
 		}
@@ -130,7 +134,7 @@ public class Engine {
 					ret = e;
 					break;
 				}
-				int temp = dfs(next,true,0);
+				int temp = dfs(next,true,0,Integer.MIN_VALUE,Integer.MAX_VALUE);
 				if(temp > curscore) {
 					ret = e;
 					curscore = temp;
@@ -147,7 +151,7 @@ public class Engine {
 					ret = e;
 					break;
 				}
-				int temp = dfs(next,false,0);
+				int temp = dfs(next,false,0,Integer.MIN_VALUE,Integer.MAX_VALUE);
 				if(temp < curscore) {
 					ret = e;
 					curscore = temp;
